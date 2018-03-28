@@ -12,7 +12,11 @@ data class ImageAttachmentViewModel(
         override val attachmentTitle: CharSequence,
         override val id: Long,
         override var reactions: List<ReactionViewModel>,
-        override var nextDownStreamMessage: BaseViewModel<*>? = null
+        override var nextDownStreamMessage: BaseViewModel<*>? = null,
+        override var progress: Long = 0L,
+        override var fileSize: Long = 0L,
+        override var completed: Boolean = false,
+        override var isPreview: Boolean = false
 ) : BaseFileAttachmentViewModel<ImageAttachment> {
     override val viewType: Int
         get() = BaseViewModel.ViewType.IMAGE_ATTACHMENT.viewType

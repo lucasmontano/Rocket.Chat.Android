@@ -4,6 +4,7 @@ import DateTimeHelper
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.net.Uri
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.AbsoluteSizeSpan
@@ -15,18 +16,18 @@ import chat.rocket.android.helper.UrlHelper
 import chat.rocket.android.infrastructure.LocalRepository
 import chat.rocket.android.server.domain.*
 import chat.rocket.android.widget.emoji.EmojiParser
+import chat.rocket.common.model.SimpleUser
 import chat.rocket.core.TokenRepository
-import chat.rocket.core.model.Message
-import chat.rocket.core.model.MessageType
-import chat.rocket.core.model.Value
+import chat.rocket.core.model.*
 import chat.rocket.core.model.attachment.*
-import chat.rocket.core.model.isSystemMessage
 import chat.rocket.core.model.url.Url
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.withContext
 import okhttp3.HttpUrl
+import org.threeten.bp.Instant
 import timber.log.Timber
 import java.security.InvalidParameterException
+import java.util.*
 import javax.inject.Inject
 
 class ViewModelMapper @Inject constructor(private val context: Context,
@@ -324,5 +325,60 @@ class ViewModelMapper @Inject constructor(private val context: Context,
                 setSpan(MessageParser.QuoteMarginSpan(context.getDrawable(R.drawable.quote), 10), 0, length, 0)
             })
         }
+    }
+
+    suspend fun mapPreview(fileName: String,
+                           mimeType: String,
+                           maxFileSize: Long,
+                           roomId: String,
+                           myself: Myself,
+                           uri: Uri,
+                           currentServer: String): List<BaseViewModel<*>> {
+        val avatar = UrlHelper.getAvatarUrl(currentServer, myself.username!!)
+        val now = Instant.now().epochSecond
+        val id = UUID.randomUUID().toString()
+        val attachmentUrl = uri.toString()
+        val sender = SimpleUser(myself.id, myself.username, myself.name)
+        val message = Message(id, roomId, "", now,
+                sender, now, null, null, null, avatar,
+                null, false, false, null,
+                null, null, null, false,
+                null)
+        val attachmentViewModel = when {
+            mimeType.startsWith("video") -> VideoAttachmentViewModel(
+                    message, VideoAttachment(fileName, null, null,
+                    null, attachmentUrl, mimeType, maxFileSize),
+                    messageId = id, attachmentUrl = attachmentUrl,
+                    attachmentTitle = fileName, id = id.hashCode().toLong(), reactions = listOf(),
+                    progress = 0L, fileSize = maxFileSize, isPreview = true
+            )
+            mimeType.startsWith("image") -> ImageAttachmentViewModel(
+                    message, rawData = ImageAttachment(fileName, null, null,
+                    null, attachmentUrl, mimeType, maxFileSize, imagePreview = null),
+                    messageId = id, attachmentUrl = attachmentUrl,
+                    attachmentTitle = fileName, id = id.hashCode().toLong(), reactions = listOf(),
+                    progress = 0L, fileSize = maxFileSize, isPreview = true
+            )
+            mimeType.startsWith("audio") -> AudioAttachmentViewModel(
+                    message, rawData = AudioAttachment(fileName, null, null,
+                    null, attachmentUrl, mimeType, maxFileSize),
+                    messageId = id, attachmentUrl = attachmentUrl,
+                    attachmentTitle = fileName, id = id.hashCode().toLong(), reactions = listOf(),
+                    progress = 0L, fileSize = maxFileSize, isPreview = true
+            )
+            else -> null
+        }
+        if (attachmentViewModel != null) {
+            return map(message.copy(attachments = listOfNotNull(attachmentViewModel.rawData)))
+                    .map {
+                        if (it is BaseFileAttachmentViewModel) {
+                            it.fileSize = maxFileSize
+                            it.isPreview = true
+                            it.progress = 0
+                        }
+                        it
+                    }
+        }
+        return map(message)
     }
 }

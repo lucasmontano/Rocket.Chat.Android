@@ -33,6 +33,36 @@
             android:src="@drawable/exo_controls_play" />
     </FrameLayout>
 
+    <RelativeLayout
+        android:id="@+id/preview_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/text_file_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"/>
+
+        <TextView
+            android:id="@+id/text_file_length"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/text_file_progress"
+            tools:text=" / 520"/>
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/progress_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text_file_progress"
+            tools:progress="20"/>
+
+    </RelativeLayout>
+
     <TextView
         android:id="@+id/file_name"
         android:layout_width="match_parent"

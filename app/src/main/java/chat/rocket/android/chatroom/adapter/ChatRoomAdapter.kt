@@ -110,8 +110,37 @@ class ChatRoomAdapter(
             this.dataSet.indexOfFirst { it.messageId == newItem.messageId && it.viewType == newItem.viewType } > -1
         }
         if (item == null) {
-            this.dataSet.addAll(0, dataSet)
-            notifyItemRangeInserted(0, dataSet.size)
+            var index = -1
+            dataSet.forEach {
+                val previewIndex = findPreviewIndex(it)
+                if (previewIndex > -1) {
+                    index = previewIndex
+                    this.dataSet[index] = it
+                    notifyItemChanged(index)
+                }
+            }
+            if (index == -1) {
+                this.dataSet.addAll(0, dataSet)
+                notifyItemRangeInserted(0, dataSet.size)
+            }
+        } else {
+            if (item is BaseFileAttachmentViewModel) {
+                val first = dataSet.first() as BaseFileAttachmentViewModel
+                item.progress = first.progress
+                notifyItemChanged(this.dataSet.indexOfFirst { it.messageId == item.messageId })
+            }
+        }
+    }
+
+    fun updateUploadPreviewItem(messageId: String, progress: Long, fileSize: Long, completed: Boolean = false) {
+        val index = dataSet.indexOfFirst { it.messageId == messageId }
+        if (index > -1) {
+            val item = dataSet[index]
+            item as BaseFileAttachmentViewModel
+            item.completed = completed
+            item.progress = progress
+            item.fileSize = fileSize
+            notifyItemChanged(index)
         }
     }
 
@@ -132,6 +161,19 @@ class ChatRoomAdapter(
                 notifyItemRemoved(indexOfFirst)
             }
         }
+    }
+
+    private fun findPreviewIndex(message: BaseViewModel<*>): Int {
+        if (message is BaseFileAttachmentViewModel) {
+            return dataSet.indexOfFirst {
+                if (it !is BaseFileAttachmentViewModel) {
+                    return@indexOfFirst false
+                }
+                val hash = it.attachmentUrl
+                it.completed && it.attachmentTitle == message.attachmentTitle && it.isPreview
+            }
+        }
+        return -1
     }
 
     fun removeItem(messageId: String) {

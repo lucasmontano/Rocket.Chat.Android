@@ -125,20 +125,38 @@ class ChatRoomPresenter @Inject constructor(private val view: ChatRoomView,
 
     fun uploadFile(roomId: String, uri: Uri, msg: String) {
         launchUI(strategy) {
-            view.showLoading()
             try {
                 val fileName = async { uriInteractor.getFileName(uri) }.await()
                 val mimeType = async { uriInteractor.getMimeType(uri) }.await()
                 val fileSize = async { uriInteractor.getFileSize(uri) }.await()
                 val maxFileSize = settings.uploadMaxFileSize()
 
+                val myself = client.me()
+                val previews = mapper.mapPreview(fileName!!, mimeType, fileSize.toLong(), roomId, myself, uri, currentServer)
+                if (previews.size == 1) {
+                    view.showLoading()
+                }
                 when {
                     fileName.isNullOrEmpty() -> view.showInvalidFileMessage()
                     fileSize > maxFileSize -> view.showInvalidFileSize(fileSize, maxFileSize)
                     else -> {
                         Timber.d("Uploading to $roomId: $fileName - $mimeType")
-                        client.uploadFile(roomId, fileName!!, mimeType, msg, description = fileName) {
+                        client.uploadFile(roomId, fileName!!, mimeType, msg, description = fileName, inputStreamProvider = {
                             uriInteractor.getInputStream(uri)
+                        }) { progress ->
+                            if (previews.size > 1) {
+                                val id = previews.first()!!.messageId
+                                launchUI(strategy) {
+                                    if (progress < fileSize) {
+                                        when (progress) {
+                                            0L -> view.showUploadPreview(previews)
+                                            else -> view.showUploadProgress(progress = progress, messageId = id, fileSize = fileSize.toLong())
+                                        }
+                                    } else {
+                                        view.setUploadPreviewCompleted(id)
+                                    }
+                                }
+                            }
                         }
                     }
                 }

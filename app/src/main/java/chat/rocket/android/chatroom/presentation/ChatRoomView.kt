@@ -118,4 +118,9 @@ interface ChatRoomView : LoadingView, MessageView {
      * @param commands The list of available commands.
      */
     fun populateCommandSuggestions(commands: List<CommandSuggestionViewModel>)
+
+    fun showUploadPreview(previews: List<BaseViewModel<*>>)
+
+    fun showUploadProgress(messageId: String, progress: Long, fileSize: Long)
+    fun setUploadPreviewCompleted(messageId: String)
 }

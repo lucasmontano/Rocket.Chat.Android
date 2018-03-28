@@ -234,6 +234,18 @@ class ChatRoomFragment : Fragment(), ChatRoomView, EmojiKeyboardListener, EmojiR
         presenter.uploadFile(chatRoomId, uri, "")
     }
 
+    override fun showUploadProgress(messageId: String, progress: Long, fileSize: Long) {
+        adapter.updateUploadPreviewItem(messageId, progress, fileSize)
+    }
+
+    override fun showUploadPreview(previews: List<BaseViewModel<*>>) {
+        adapter.prependData(previews)
+    }
+
+    override fun setUploadPreviewCompleted(messageId: String) {
+        adapter.updateUploadPreviewItem(messageId, 0, 0, completed = true)
+    }
+
     override fun showInvalidFileMessage() = showMessage(getString(R.string.msg_invalid_file))
 
     override fun showNewMessage(message: List<BaseViewModel<*>>) {
