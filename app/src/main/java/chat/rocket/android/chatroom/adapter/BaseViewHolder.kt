@@ -15,6 +15,7 @@ import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import ru.whalemare.sheetmenu.extension.inflate
 import ru.whalemare.sheetmenu.extension.toList
+import java.text.DecimalFormat
 
 
 abstract class BaseViewHolder<T : BaseViewModel<*>>(
@@ -99,5 +100,12 @@ abstract class BaseViewHolder<T : BaseViewModel<*>>(
             listener.onActionSelected(item, it.message)
         }
         return true
+    }
+
+    internal fun readableSize(size: Long): String {
+        if (size <= 0) return "0"
+        val units = arrayOf("B", "kB", "MB", "GB", "TB")
+        val digitGroups = (Math.log10(size.toDouble()) / Math.log10(1024.0)).toInt()
+        return DecimalFormat("#,##0.#").format(size / Math.pow(1024.0, digitGroups.toDouble())) + " " + units[digitGroups]
     }
 }

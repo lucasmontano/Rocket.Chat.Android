@@ -198,8 +198,10 @@ class ChatRoomFragment : Fragment(), ChatRoomView, EmojiKeyboardListener, EmojiR
                 recycler_view.adapter = adapter
                 val linearLayoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, true)
                 linearLayoutManager.stackFromEnd = true
+                val itemAnimator = DefaultItemAnimator()
+                itemAnimator.supportsChangeAnimations = false
                 recycler_view.layoutManager = linearLayoutManager
-                recycler_view.itemAnimator = DefaultItemAnimator()
+                recycler_view.itemAnimator = itemAnimator
                 if (dataSet.size >= 30) {
                     recycler_view.addOnScrollListener(object : EndlessRecyclerViewScrollListener(linearLayoutManager) {
                         override fun onLoadMore(page: Int, totalItemsCount: Int, recyclerView: RecyclerView?) {

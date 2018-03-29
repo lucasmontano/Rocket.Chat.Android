@@ -27,14 +27,23 @@
         tools:visibility="visible">
 
         <ImageView
+            android:id="@+id/image_preview_play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:src="@drawable/exo_controls_play" />
+
+        <ImageView
+            android:id="@+id/image_preview_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_close_white_24dp"
+            android:visibility="gone" />
     </FrameLayout>
 
     <RelativeLayout
-        android:id="@+id/preview_container"
+        android:id="@+id/preview_progress_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
@@ -43,23 +52,22 @@
         <TextView
             android:id="@+id/text_file_progress"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0"/>
+            android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/text_file_length"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/text_file_progress"
-            tools:text=" / 520"/>
+            tools:text=" / 520" />
 
         <ProgressBar
-            style="?android:attr/progressBarStyleHorizontal"
             android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/text_file_progress"
-            tools:progress="20"/>
+            tools:progress="20" />
 
     </RelativeLayout>
 

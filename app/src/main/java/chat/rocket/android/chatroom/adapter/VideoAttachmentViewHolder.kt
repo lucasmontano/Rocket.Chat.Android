@@ -6,7 +6,6 @@ import chat.rocket.android.player.PlayerActivity
 import chat.rocket.android.util.extensions.setVisible
 import chat.rocket.android.widget.emoji.EmojiReactionListener
 import kotlinx.android.synthetic.main.message_attachment.view.*
-import java.text.DecimalFormat
 
 class VideoAttachmentViewHolder(itemView: View,
                                 listener: ActionsListener,
@@ -25,31 +24,34 @@ class VideoAttachmentViewHolder(itemView: View,
     override fun bindViews(data: VideoAttachmentViewModel) {
         with(itemView) {
             if (data.isPreview) {
-                // we have a preview
+                image_preview_cancel.setVisible(true)
+                image_preview_play.setVisible(false)
                 val fileLength = data.fileSize
                 val progress = data.progress
                 val finished = progress >= fileLength
-                preview_container.setVisible(!finished)
+                preview_progress_container.setVisible(!finished)
                 text_file_progress.text = readableSize(progress)
-                text_file_length.text = "/ ${readableSize(fileLength)}"
+                if (text_file_length.text.isEmpty()) {
+                    text_file_length.text = "/ ${readableSize(fileLength)}"
+                }
                 progress_bar.max = fileLength.toInt()
                 progress_bar.progress = progress.toInt()
+                audio_video_attachment.setOnClickListener { view ->
+                    data.attachmentUrl.let { url ->
+
+                    }
+                }
             } else {
-                preview_container.setVisible(false)
-            }
-            file_name.text = data.attachmentTitle
-            audio_video_attachment.setOnClickListener { view ->
-                data.attachmentUrl.let { url ->
-                    PlayerActivity.play(view.context, url)
+                preview_progress_container.setVisible(false)
+                image_preview_cancel.setVisible(false)
+                image_preview_play.setVisible(true)
+                audio_video_attachment.setOnClickListener { view ->
+                    data.attachmentUrl.let { url ->
+                        PlayerActivity.play(view.context, url)
+                    }
                 }
             }
+            file_name.text = data.attachmentTitle
         }
-    }
-
-    private fun readableSize(size: Long): String {
-        if (size <= 0) return "0"
-        val units = arrayOf("B", "kB", "MB", "GB", "TB")
-        val digitGroups = (Math.log10(size.toDouble()) / Math.log10(1024.0)).toInt()
-        return DecimalFormat("#,##0.#").format(size / Math.pow(1024.0, digitGroups.toDouble())) + " " + units[digitGroups]
     }
 }

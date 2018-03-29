@@ -122,6 +122,12 @@ class ChatRoomAdapter(
             if (index == -1) {
                 this.dataSet.addAll(0, dataSet)
                 notifyItemRangeInserted(0, dataSet.size)
+            } else {
+                val message = dataSet.firstOrNull { it is MessageViewModel }
+                if (message != null && index + 1 < this.dataSet.size) {
+                    this.dataSet[index + 1] = message
+                    notifyItemChanged(index + 1)
+                }
             }
         } else {
             if (item is BaseFileAttachmentViewModel) {
