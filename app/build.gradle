@@ -97,7 +97,6 @@ dependencies {
     implementation libraries.frescoImageViewer
 
     implementation libraries.markwon
-    implementation libraries.markwonImageLoader
 
     implementation libraries.sheetMenu
 
