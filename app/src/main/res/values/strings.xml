@@ -112,6 +112,7 @@
 
     <!-- Upload Messages -->
     <string name="max_file_size_exceeded">File size %1$d bytes exceeded max upload size of %2$d bytes</string>
+    <string name="max_file_size" translatable="false"> / %1$s</string>
 
     <!-- Socket status -->
     <string name="status_connected">connected</string>

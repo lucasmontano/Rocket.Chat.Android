@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.view.View
 import androidx.net.toUri
+import chat.rocket.android.R
 import chat.rocket.android.chatroom.viewmodel.VideoAttachmentViewModel
 import chat.rocket.android.player.PlayerActivity
 import chat.rocket.android.util.extensions.setVisible
@@ -15,9 +16,7 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.threeten.bp.Duration
 import org.threeten.bp.temporal.ChronoUnit
-import org.threeten.bp.temporal.TemporalUnit
 import timber.log.Timber
-import java.time.LocalDateTime
 
 class VideoAttachmentViewHolder(itemView: View,
                                 listener: ActionsListener,
@@ -47,7 +46,7 @@ class VideoAttachmentViewHolder(itemView: View,
                 preview_progress_container.setVisible(!finished)
                 text_file_progress.text = readableSize(progress)
                 if (text_file_length.text.isEmpty()) {
-                    text_file_length.text = "/ ${readableSize(fileLength)}"
+                    text_file_length.text = ctx.getString(R.string.max_file_size, readableSize(fileLength))
                 }
                 progress_bar.max = fileLength.toInt()
                 progress_bar.progress = progress.toInt()

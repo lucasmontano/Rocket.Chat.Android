@@ -1,6 +1,7 @@
 package chat.rocket.android.chatroom.adapter
 
 import android.view.View
+import chat.rocket.android.R
 import chat.rocket.android.chatroom.viewmodel.ImageAttachmentViewModel
 import chat.rocket.android.util.extensions.setVisible
 import chat.rocket.android.widget.emoji.EmojiReactionListener
@@ -22,14 +23,14 @@ class ImageAttachmentViewHolder(itemView: View,
 
     override fun bindViews(data: ImageAttachmentViewModel) {
         with(itemView) {
+            val ctx = context
             if (data.isPreview) {
-                // we have a preview
                 val fileLength = data.fileSize
                 val progress = data.progress
                 val finished = progress >= fileLength
                 preview_progress_container.setVisible(!finished)
                 text_file_progress.text = readableSize(progress)
-                text_file_length.text = "/ ${readableSize(fileLength)}"
+                text_file_length.text = ctx.getString(R.string.max_file_size, readableSize(fileLength))
                 progress_bar.max = fileLength.toInt()
                 progress_bar.progress = progress.toInt()
             } else {
