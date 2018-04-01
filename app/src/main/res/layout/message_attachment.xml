@@ -36,6 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:background="@drawable/play_button_circle_bg"
             android:src="@drawable/exo_controls_play" />
 
         <ImageView
@@ -45,6 +46,19 @@
             android:layout_gravity="center"
             android:src="@drawable/ic_close_white_24dp"
             android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/text_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|bottom"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="8dp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:text="00:30"
+            tools:visibility="visible" />
     </FrameLayout>
 
     <RelativeLayout

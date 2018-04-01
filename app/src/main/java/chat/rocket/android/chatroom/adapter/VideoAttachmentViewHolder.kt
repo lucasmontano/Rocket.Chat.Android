@@ -13,13 +13,18 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import org.threeten.bp.Duration
+import org.threeten.bp.temporal.ChronoUnit
+import org.threeten.bp.temporal.TemporalUnit
 import timber.log.Timber
+import java.time.LocalDateTime
 
 class VideoAttachmentViewHolder(itemView: View,
                                 listener: ActionsListener,
                                 reactionListener: EmojiReactionListener? = null)
     : BaseViewHolder<VideoAttachmentViewModel>(itemView, listener, reactionListener) {
     private var job: Job? = null
+    private val cache = mutableMapOf<String, Bitmap>()
 
     init {
         with(itemView) {
@@ -66,33 +71,57 @@ class VideoAttachmentViewHolder(itemView: View,
             if (job?.isActive != true || audio_video_preview.drawable == null) {
                 job = launch(UI) {
                     val url = data.attachmentUrl
-                    val previewBitmap = async {
+                    val mediaMetadataRetriever = async {
                         val mediaMetadataRetriever = MediaMetadataRetriever()
                         try {
                             if (url.startsWith("content") || url.startsWith("file")) {
-                                val uri = url.toUri()
-                                mediaMetadataRetriever.setDataSource(ctx, uri)
+                                mediaMetadataRetriever.setDataSource(ctx, url.toUri())
                             } else {
-                                mediaMetadataRetriever.setDataSource(url, hashMapOf())
+                                mediaMetadataRetriever.setDataSource(url, emptyMap())
                             }
-                            mediaMetadataRetriever.getFrameAtTime(1,
-                                    MediaMetadataRetriever.OPTION_CLOSEST)
+                            mediaMetadataRetriever
                         } catch (ex: RuntimeException) {
                             Timber.e(ex)
-                        } finally {
                             mediaMetadataRetriever.release()
+                            null
                         }
                     }.await()
-                    if (previewBitmap is Bitmap) {
-                        audio_video_preview.setImageBitmap(previewBitmap)
+
+                    if (mediaMetadataRetriever != null) {
+                        val duration = mediaMetadataRetriever.extractMetadata(
+                                MediaMetadataRetriever.METADATA_KEY_DURATION)
+
+                        text_duration.setVisible(true)
+                        text_duration.text = getDuration(Duration.of(duration.toLong(), ChronoUnit.MILLIS))
+
+                        val previewBitmap = mediaMetadataRetriever.getFrameAtTime(1,
+                                MediaMetadataRetriever.OPTION_CLOSEST)
+                        if (previewBitmap is Bitmap) {
+                            cache[url] = previewBitmap
+                            audio_video_preview.setImageBitmap(previewBitmap)
+                        }
                     }
                 }
             }
         }
     }
 
+    private fun getDuration(duration: Duration): String {
+        val hours = duration.toHours()
+        val minutes = duration.toMinutes()
+        val seconds = duration.toMillis() / 1000L
+        var formatted = ""
+        if (hours > 0) {
+            formatted += "${hours.toString().padStart(2, '0')}:"
+        }
+        formatted += "${minutes.toString().padStart(2, '0')}:"
+        formatted += seconds.toString().padStart(2, '0')
+        return formatted
+    }
+
     fun resetState() {
         with(itemView) {
+            text_duration.setVisible(false)
             audio_video_preview.setImageDrawable(null)
             job?.cancel()
         }
