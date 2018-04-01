@@ -1,11 +1,7 @@
 package chat.rocket.android.chatroom.adapter
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
-import android.media.ThumbnailUtils
-import android.net.Uri
-import android.provider.MediaStore
 import android.view.View
 import androidx.net.toUri
 import chat.rocket.android.chatroom.viewmodel.VideoAttachmentViewModel
@@ -100,15 +96,5 @@ class VideoAttachmentViewHolder(itemView: View,
             audio_video_preview.setImageDrawable(null)
             job?.cancel()
         }
-    }
-
-    private fun getImagePath(context: Context, uri: Uri): String {
-        val proj = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor = context.contentResolver.query(uri, proj, null, null, null)
-        val column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-        cursor.moveToFirst()
-        val path = cursor.getString(column_index)
-        cursor.close()
-        return path
     }
 }
