@@ -156,7 +156,7 @@ class ViewModelMapper @Inject constructor(private val context: Context,
 
     private fun attachmentUrl(attachment: FileAttachment): String {
         return with(attachment) {
-            if (url.startsWith("http")) return@with url
+            if (url.startsWith("http") || url.startsWith("content")) return@with url
 
             val fullUrl = "$baseUrl$url"
             val httpUrl = HttpUrl.parse(fullUrl)

@@ -202,6 +202,11 @@ class ChatRoomAdapter(
         }
     }
 
+    override fun onViewRecycled(holder: BaseViewHolder<*>?) {
+        (holder as? VideoAttachmentViewHolder)?.resetState()
+        super.onViewRecycled(holder)
+    }
+
     val actionsListener = object : BaseViewHolder.ActionsListener {
         override fun isActionsEnabled(): Boolean = enableActions
 
