@@ -16,7 +16,8 @@ data class AudioAttachmentViewModel(
         override var progress: Long = 0L,
         override var fileSize: Long = 0L,
         override var completed: Boolean = false,
-        override var isPreview: Boolean = false
+        override var isPreview: Boolean = false,
+        override var preview: Message? = null
 ) : BaseFileAttachmentViewModel<AudioAttachment> {
     override val viewType: Int
         get() = BaseViewModel.ViewType.AUDIO_ATTACHMENT.viewType

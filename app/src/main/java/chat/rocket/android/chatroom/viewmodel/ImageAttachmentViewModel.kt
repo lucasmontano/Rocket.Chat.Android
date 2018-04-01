@@ -16,6 +16,7 @@ data class ImageAttachmentViewModel(
         override var progress: Long = 0L,
         override var fileSize: Long = 0L,
         override var completed: Boolean = false,
+        override var preview: Message? = null,
         override var isPreview: Boolean = false
 ) : BaseFileAttachmentViewModel<ImageAttachment> {
     override val viewType: Int
