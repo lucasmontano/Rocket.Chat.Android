@@ -6,6 +6,9 @@ import android.media.MediaMetadataRetriever
 import android.view.View
 import androidx.net.toUri
 import chat.rocket.android.R
+import chat.rocket.android.chatroom.di.DaggerChatRoomViewHolderComponent
+import chat.rocket.android.chatroom.domain.MediaCache
+import chat.rocket.android.chatroom.domain.MediaMetadata
 import chat.rocket.android.chatroom.viewmodel.VideoAttachmentViewModel
 import chat.rocket.android.player.PlayerActivity
 import chat.rocket.android.util.extensions.setVisible
@@ -19,15 +22,20 @@ import kotlinx.coroutines.experimental.withContext
 import org.threeten.bp.Duration
 import org.threeten.bp.temporal.ChronoUnit
 import timber.log.Timber
+import javax.inject.Inject
 
 class VideoAttachmentViewHolder(itemView: View,
                                 listener: ActionsListener,
                                 reactionListener: EmojiReactionListener? = null)
     : BaseViewHolder<VideoAttachmentViewModel>(itemView, listener, reactionListener) {
     private var job: Job? = null
-    private val cache = mutableMapOf<String, Bitmap>()
+    @Inject lateinit var cache: MediaCache
 
     init {
+        DaggerChatRoomViewHolderComponent.builder()
+                .context(itemView.context.applicationContext)
+                .build()
+                .inject(this)
         with(itemView) {
             image_attachment.setVisible(false)
             audio_video_attachment.setVisible(true)
@@ -37,6 +45,7 @@ class VideoAttachmentViewHolder(itemView: View,
     }
 
     override fun bindViews(data: VideoAttachmentViewModel) {
+        val url = data.attachmentUrl
         with(itemView) {
             val ctx = context
             if (data.isPreview) {
@@ -53,9 +62,6 @@ class VideoAttachmentViewHolder(itemView: View,
                 progress_bar.max = fileLength.toInt()
                 progress_bar.progress = progress.toInt()
                 audio_video_attachment.setOnClickListener { view ->
-                    data.attachmentUrl.let { url ->
-
-                    }
                 }
             } else {
                 preview_progress_container.setVisible(false)
@@ -69,18 +75,24 @@ class VideoAttachmentViewHolder(itemView: View,
             }
             file_name.text = data.attachmentTitle
 
-            if (job?.isActive != true || audio_video_preview.drawable == null) {
+            val cachedMediaData = cache.get(url)
+            if (cachedMediaData == null) {
                 job = launch(UI) {
-                    val url = data.attachmentUrl
                     val mediaMetadata = getMediaMetadata(ctx, url)
                     mediaMetadata?.let {
                         text_duration.setVisible(true)
                         text_duration.text = it.duration
                         if (it.frame is Bitmap) {
-                            cache[url] = it.frame
                             audio_video_preview.setImageBitmap(it.frame)
+                            cache.put(url, mediaMetadata)
                         }
                     }
+                }
+            } else {
+                with(cachedMediaData) {
+                    audio_video_preview.setImageBitmap(frame)
+                    text_duration.setVisible(true)
+                    text_duration.text = duration
                 }
             }
         }
@@ -111,7 +123,6 @@ class VideoAttachmentViewHolder(itemView: View,
         val hours = duration.toHours()
         val minutes = duration.toMinutes()
         val seconds = (duration.toMillis() / 1000L) % 60
-        println(minutes)
         var formatted = ""
         if (hours > 0) {
             formatted += "${hours.toString().padStart(2, '0')}:"
@@ -128,9 +139,4 @@ class VideoAttachmentViewHolder(itemView: View,
             job?.cancel()
         }
     }
-
-    data class MediaMetadata(
-            val frame: Bitmap?,
-            val duration: String
-    )
 }
