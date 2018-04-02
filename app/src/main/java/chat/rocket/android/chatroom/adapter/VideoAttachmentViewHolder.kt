@@ -3,13 +3,14 @@ package chat.rocket.android.chatroom.adapter
 import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
+import android.media.ThumbnailUtils
+import android.provider.MediaStore
 import android.view.View
 import androidx.net.toUri
 import chat.rocket.android.R
 import chat.rocket.android.chatroom.di.DaggerChatRoomViewHolderComponent
 import chat.rocket.android.chatroom.domain.MediaCache
-import chat.rocket.android.chatroom.domain.MediaMetadata
-import chat.rocket.android.chatroom.viewmodel.BaseViewModel
+import chat.rocket.android.chatroom.viewmodel.media.MediaMetadataViewModel
 import chat.rocket.android.chatroom.viewmodel.VideoAttachmentViewModel
 import chat.rocket.android.player.PlayerActivity
 import chat.rocket.android.util.extensions.setVisible
@@ -100,7 +101,7 @@ class VideoAttachmentViewHolder(itemView: View,
     }
 
     private suspend fun getMediaMetadata(context: Context, url: String)
-            : MediaMetadata? = withContext(CommonPool) {
+            : MediaMetadataViewModel? = withContext(CommonPool) {
         val mmr = MediaMetadataRetriever()
         try {
             if (url.startsWith("content") || url.startsWith("file")) {
@@ -111,7 +112,10 @@ class VideoAttachmentViewHolder(itemView: View,
             val durationMs = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
             val duration = getFormattedDuration(Duration.of(durationMs.toLong(), ChronoUnit.MILLIS))
             val frame = mmr.getFrameAtTime(1, MediaMetadataRetriever.OPTION_CLOSEST)
-            return@withContext MediaMetadata(frame, duration)
+            val thumb = ThumbnailUtils.extractThumbnail(frame, frame.width / 2,
+                    frame.height / 2, MediaStore.Images.Thumbnails.MINI_KIND)
+
+            return@withContext MediaMetadataViewModel(thumb, duration)
         } catch (ex: RuntimeException) {
             Timber.e(ex)
         } finally {

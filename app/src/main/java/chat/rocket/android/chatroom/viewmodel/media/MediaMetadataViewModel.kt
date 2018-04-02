@@ -1,8 +1,8 @@
-package chat.rocket.android.chatroom.domain
+package chat.rocket.android.chatroom.viewmodel.media
 
 import android.graphics.Bitmap
 
-data class MediaMetadata(
+data class MediaMetadataViewModel(
         val frame: Bitmap?,
         val duration: String
 )
