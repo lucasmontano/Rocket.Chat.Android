@@ -201,7 +201,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideMultiServerTokenRepository(repository: LocalRepository, moshi: Moshi): MultiServerTokenRepository {
+    fun provideMultiServerTokenRepository(repository: LocalRepository, moshi: Moshi)
+            : MultiServerTokenRepository {
         return SharedPreferencesMultiServerTokenRepository(repository, moshi)
     }
 
@@ -219,7 +220,7 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideConfiguration(context: Application, client: OkHttpClient): SpannableConfiguration {
+    fun provideConfiguration(context: Application): SpannableConfiguration {
         val res = context.resources
         return SpannableConfiguration.builder(context)
                 .theme(SpannableTheme.builder()

@@ -9,6 +9,7 @@ import chat.rocket.android.R
 import chat.rocket.android.chatroom.di.DaggerChatRoomViewHolderComponent
 import chat.rocket.android.chatroom.domain.MediaCache
 import chat.rocket.android.chatroom.domain.MediaMetadata
+import chat.rocket.android.chatroom.viewmodel.BaseViewModel
 import chat.rocket.android.chatroom.viewmodel.VideoAttachmentViewModel
 import chat.rocket.android.player.PlayerActivity
 import chat.rocket.android.util.extensions.setVisible
