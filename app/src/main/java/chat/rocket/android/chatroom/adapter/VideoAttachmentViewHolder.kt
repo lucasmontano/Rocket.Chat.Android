@@ -1,5 +1,6 @@
 package chat.rocket.android.chatroom.adapter
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.view.View
@@ -10,10 +11,11 @@ import chat.rocket.android.player.PlayerActivity
 import chat.rocket.android.util.extensions.setVisible
 import chat.rocket.android.widget.emoji.EmojiReactionListener
 import kotlinx.android.synthetic.main.message_attachment.view.*
+import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.withContext
 import org.threeten.bp.Duration
 import org.threeten.bp.temporal.ChronoUnit
 import timber.log.Timber
@@ -70,34 +72,13 @@ class VideoAttachmentViewHolder(itemView: View,
             if (job?.isActive != true || audio_video_preview.drawable == null) {
                 job = launch(UI) {
                     val url = data.attachmentUrl
-                    val mediaMetadataRetriever = async {
-                        val mediaMetadataRetriever = MediaMetadataRetriever()
-                        try {
-                            if (url.startsWith("content") || url.startsWith("file")) {
-                                mediaMetadataRetriever.setDataSource(ctx, url.toUri())
-                            } else {
-                                mediaMetadataRetriever.setDataSource(url, emptyMap())
-                            }
-                            mediaMetadataRetriever
-                        } catch (ex: RuntimeException) {
-                            Timber.e(ex)
-                            mediaMetadataRetriever.release()
-                            null
-                        }
-                    }.await()
-
-                    if (mediaMetadataRetriever != null) {
-                        val duration = mediaMetadataRetriever.extractMetadata(
-                                MediaMetadataRetriever.METADATA_KEY_DURATION)
-
+                    val mediaMetadata = getMediaMetadata(ctx, url)
+                    mediaMetadata?.let {
                         text_duration.setVisible(true)
-                        text_duration.text = getDuration(Duration.of(duration.toLong(), ChronoUnit.MILLIS))
-
-                        val previewBitmap = mediaMetadataRetriever.getFrameAtTime(1,
-                                MediaMetadataRetriever.OPTION_CLOSEST)
-                        if (previewBitmap is Bitmap) {
-                            cache[url] = previewBitmap
-                            audio_video_preview.setImageBitmap(previewBitmap)
+                        text_duration.text = it.duration
+                        if (it.frame is Bitmap) {
+                            cache[url] = it.frame
+                            audio_video_preview.setImageBitmap(it.frame)
                         }
                     }
                 }
@@ -105,7 +86,28 @@ class VideoAttachmentViewHolder(itemView: View,
         }
     }
 
-    private fun getDuration(duration: Duration): String {
+    private suspend fun getMediaMetadata(context: Context, url: String)
+            : MediaMetadata? = withContext(CommonPool) {
+        val mmr = MediaMetadataRetriever()
+        try {
+            if (url.startsWith("content") || url.startsWith("file")) {
+                mmr.setDataSource(context, url.toUri())
+            } else {
+                mmr.setDataSource(url, emptyMap())
+            }
+            val durationMs = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            val duration = getFormattedDuration(Duration.of(durationMs.toLong(), ChronoUnit.MILLIS))
+            val frame = mmr.getFrameAtTime(1, MediaMetadataRetriever.OPTION_CLOSEST)
+            return@withContext MediaMetadata(frame, duration)
+        } catch (ex: RuntimeException) {
+            Timber.e(ex)
+        } finally {
+            mmr.release()
+        }
+        return@withContext null
+    }
+
+    private fun getFormattedDuration(duration: Duration): String {
         val hours = duration.toHours()
         val minutes = duration.toMinutes()
         val seconds = duration.toMillis() / 1000L
@@ -125,4 +127,9 @@ class VideoAttachmentViewHolder(itemView: View,
             job?.cancel()
         }
     }
+
+    data class MediaMetadata(
+            val frame: Bitmap?,
+            val duration: String
+    )
 }
