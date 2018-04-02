@@ -110,7 +110,8 @@ class VideoAttachmentViewHolder(itemView: View,
     private fun getFormattedDuration(duration: Duration): String {
         val hours = duration.toHours()
         val minutes = duration.toMinutes()
-        val seconds = duration.toMillis() / 1000L
+        val seconds = (duration.toMillis() / 1000L) % 60
+        println(minutes)
         var formatted = ""
         if (hours > 0) {
             formatted += "${hours.toString().padStart(2, '0')}:"
