@@ -202,7 +202,7 @@ class ChatRoomAdapter(
         }
     }
 
-    override fun onViewRecycled(holder: BaseViewHolder<*>?) {
+    override fun onViewRecycled(holder: BaseViewHolder<*>) {
         (holder as? VideoAttachmentViewHolder)?.resetState()
         super.onViewRecycled(holder)
     }
