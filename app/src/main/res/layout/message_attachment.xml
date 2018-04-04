@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/attachment_container"
@@ -21,31 +22,44 @@
     <FrameLayout
         android:id="@+id/audio_video_attachment"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:background="@color/black"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
         android:visibility="gone"
         tools:visibility="visible">
 
-        <ImageView
-            android:id="@+id/audio_video_preview"
+        <FrameLayout
+            android:id="@+id/video_container"
             android:layout_width="match_parent"
-            android:layout_height="150dp" />
+            android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/image_preview_play"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@drawable/play_button_circle_bg"
-            android:src="@drawable/exo_controls_play" />
+            <ImageView
+                android:id="@+id/audio_video_preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="fitStart"
+                tools:src="@tools:sample/avatars" />
 
-        <ImageView
-            android:id="@+id/image_preview_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_close_white_24dp"
-            android:visibility="gone" />
+            <ImageView
+                android:id="@+id/image_preview_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/play_button_circle_bg"
+                android:visibility="gone"
+                android:src="@drawable/exo_controls_play" />
+
+            <ImageView
+                android:id="@+id/image_preview_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_close_white_24dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/audio_video_preview"
+                app:layout_constraintEnd_toEndOf="@+id/audio_video_preview"
+                app:layout_constraintStart_toStartOf="@+id/audio_video_preview"
+                app:layout_constraintTop_toTopOf="@+id/audio_video_preview" />
+        </FrameLayout>
 
         <TextView
             android:id="@+id/text_duration"
