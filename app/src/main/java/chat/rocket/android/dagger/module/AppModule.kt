@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.arch.persistence.room.Room
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.content.systemService
 import chat.rocket.android.BuildConfig
 import chat.rocket.android.R
 import chat.rocket.android.app.RocketChatDatabase
@@ -17,6 +16,7 @@ import chat.rocket.android.helper.MessageParser
 import chat.rocket.android.infrastructure.LocalRepository
 import chat.rocket.android.infrastructure.SharedPrefsLocalRepository
 import chat.rocket.android.push.GroupedPush
+import chat.rocket.android.push.PushManager
 import chat.rocket.android.server.domain.*
 import chat.rocket.android.server.infraestructure.*
 import chat.rocket.android.util.AppJsonAdapterFactory
@@ -247,9 +247,22 @@ class AppModule {
             SharedPreferencesAccountsRepository(preferences, moshi)
 
     @Provides
-    fun provideNotificationManager(context: Context): NotificationManager = context.systemService()
+    fun provideNotificationManager(context: Context): NotificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     @Provides
     @Singleton
     fun provideGroupedPush() = GroupedPush()
+
+    @Provides
+    @Singleton
+    fun providePushManager(
+            context: Context,
+            groupedPushes: GroupedPush,
+            manager: NotificationManager,
+            moshi: Moshi,
+            getAccountInteractor: GetAccountInteractor,
+            getSettingsInteractor: GetSettingsInteractor): PushManager {
+        return PushManager(groupedPushes, manager, moshi, getAccountInteractor, getSettingsInteractor, context)
+    }
 }
