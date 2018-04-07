@@ -2,7 +2,6 @@ package chat.rocket.android.widget.autocompletion.ui
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.transition.Slide
@@ -224,7 +223,6 @@ class SuggestionsView : FrameLayout, TextWatcher {
 
     private class TopItemDecoration() : RecyclerView.ItemDecoration() {
         private lateinit var divider: Drawable
-        private val padding = Rect()
 
         // Custom divider will be used.
         constructor(context: Context, @DrawableRes drawableResId: Int) : this() {
