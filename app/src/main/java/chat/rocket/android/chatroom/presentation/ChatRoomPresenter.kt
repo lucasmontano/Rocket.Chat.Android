@@ -506,8 +506,8 @@ class ChatRoomPresenter @Inject constructor(private val view: ChatRoomView,
 
     fun setupMessageComposer() {
         when (chatRoomType) {
-            //Direct Message
-            "d" -> joinChat(chatRoomId!!)
+            //Direct Message join direct to chat
+            "d" -> view.onJoined()
             //Others
             else -> view.setupMessageComposer()
         }
