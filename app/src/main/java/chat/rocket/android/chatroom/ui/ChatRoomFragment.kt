@@ -119,7 +119,7 @@ class ChatRoomFragment : Fragment(), ChatRoomView, EmojiKeyboardListener, EmojiR
         presenter.loadChatRooms()
         setupRecyclerView()
         setupFab()
-        setupMessageComposer()
+        presenter.setupMessageComposer()
         setupSuggestionsView()
         setupActionSnackbar()
         activity?.apply {
@@ -463,11 +463,82 @@ class ChatRoomFragment : Fragment(), ChatRoomView, EmojiKeyboardListener, EmojiR
         }
     }
 
+    override fun setupMessageComposer() {
+        if (isChatRoomReadOnly) {
+            text_room_is_read_only.setVisible(true)
+            input_container.setVisible(false)
+        } else if (!isSubscribed) {
+            input_container.setVisible(false)
+            button_join_chat.setVisible(true)
+            button_join_chat.setOnClickListener { presenter.joinChat(chatRoomId) }
+        } else {
+            joinChat()
+        }
+    }
+
     override fun onJoined() {
         input_container.setVisible(true)
         button_join_chat.setVisible(false)
         isSubscribed = true
-        setupMessageComposer()
+        joinChat()
+    }
+
+    private fun joinChat() {
+        button_send.alpha = 0f
+        button_send.setVisible(false)
+        button_show_attachment_options.alpha = 1f
+        button_show_attachment_options.setVisible(true)
+
+        subscribeTextMessage()
+        emojiKeyboardPopup = EmojiKeyboardPopup(activity!!, activity!!.findViewById(R.id.fragment_container))
+        emojiKeyboardPopup.listener = this
+        text_message.listener = object : ComposerEditText.ComposerEditTextListener {
+            override fun onKeyboardOpened() {
+            }
+
+            override fun onKeyboardClosed() {
+                activity?.let {
+                    if (!emojiKeyboardPopup.isKeyboardOpen) {
+                        it.onBackPressed()
+                    }
+                    KeyboardHelper.hideSoftKeyboard(it)
+                    emojiKeyboardPopup.dismiss()
+                }
+                setReactionButtonIcon(R.drawable.ic_reaction_24dp)
+            }
+        }
+
+        button_send.setOnClickListener {
+            var textMessage = citation ?: ""
+            textMessage += text_message.textContent
+            sendMessage(textMessage)
+        }
+
+        button_show_attachment_options.setOnClickListener {
+            if (layout_message_attachment_options.isShown) {
+                hideAttachmentOptions()
+            } else {
+                showAttachmentOptions()
+            }
+        }
+
+        view_dim.setOnClickListener {
+            hideAttachmentOptions()
+        }
+
+        button_files.setOnClickListener {
+            handler.postDelayed({
+                presenter.selectFile()
+            }, 200)
+
+            handler.postDelayed({
+                hideAttachmentOptions()
+            }, 400)
+        }
+
+        button_add_reaction.setOnClickListener { view ->
+            openEmojiKeyboardPopup()
+        }
     }
 
     private val dismissStatus = {
@@ -494,73 +565,6 @@ class ChatRoomFragment : Fragment(), ChatRoomView, EmojiKeyboardListener, EmojiR
             recycler_view.scrollToPosition(0)
             verticalScrollOffset.set(0)
             button_fab.hide()
-        }
-    }
-
-    private fun setupMessageComposer() {
-        if (isChatRoomReadOnly) {
-            text_room_is_read_only.setVisible(true)
-            input_container.setVisible(false)
-        } else if (!isSubscribed) {
-            input_container.setVisible(false)
-            button_join_chat.setVisible(true)
-            button_join_chat.setOnClickListener { presenter.joinChat(chatRoomId) }
-        } else {
-            button_send.alpha = 0f
-            button_send.setVisible(false)
-            button_show_attachment_options.alpha = 1f
-            button_show_attachment_options.setVisible(true)
-
-            subscribeTextMessage()
-            emojiKeyboardPopup = EmojiKeyboardPopup(activity!!, activity!!.findViewById(R.id.fragment_container))
-            emojiKeyboardPopup.listener = this
-            text_message.listener = object : ComposerEditText.ComposerEditTextListener {
-                override fun onKeyboardOpened() {
-                }
-
-                override fun onKeyboardClosed() {
-                    activity?.let {
-                        if (!emojiKeyboardPopup.isKeyboardOpen) {
-                            it.onBackPressed()
-                        }
-                        KeyboardHelper.hideSoftKeyboard(it)
-                        emojiKeyboardPopup.dismiss()
-                    }
-                    setReactionButtonIcon(R.drawable.ic_reaction_24dp)
-                }
-            }
-
-            button_send.setOnClickListener {
-                var textMessage = citation ?: ""
-                textMessage += text_message.textContent
-                sendMessage(textMessage)
-            }
-
-            button_show_attachment_options.setOnClickListener {
-                if (layout_message_attachment_options.isShown) {
-                    hideAttachmentOptions()
-                } else {
-                    showAttachmentOptions()
-                }
-            }
-
-            view_dim.setOnClickListener {
-                hideAttachmentOptions()
-            }
-
-            button_files.setOnClickListener {
-                handler.postDelayed({
-                    presenter.selectFile()
-                }, 200)
-
-                handler.postDelayed({
-                    hideAttachmentOptions()
-                }, 400)
-            }
-
-            button_add_reaction.setOnClickListener { view ->
-                openEmojiKeyboardPopup()
-            }
         }
     }
 

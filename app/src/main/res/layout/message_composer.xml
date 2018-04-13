@@ -32,6 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="45dp"
             android:background="@color/white"
+            android:foreground="?selectableItemBackgroundBorderless"
             android:text="@string/action_join_chat"
             android:textColor="@color/colorAccent"
             android:visibility="gone"

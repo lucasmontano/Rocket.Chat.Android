@@ -120,4 +120,9 @@ interface ChatRoomView : LoadingView, MessageView {
      * @param commands The list of available commands.
      */
     fun populateCommandSuggestions(commands: List<CommandSuggestionViewModel>)
+
+    /**
+     * Setup the message composer
+     */
+    fun setupMessageComposer()
 }

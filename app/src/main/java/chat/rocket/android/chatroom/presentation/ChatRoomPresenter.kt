@@ -504,6 +504,15 @@ class ChatRoomPresenter @Inject constructor(private val view: ChatRoomView,
         }
     }
 
+    fun setupMessageComposer() {
+        when (chatRoomType) {
+            //Direct Message
+            "d" -> joinChat(chatRoomId!!)
+            //Others
+            else -> view.setupMessageComposer()
+        }
+    }
+
     /**
      * Send an emoji reaction to a message.
      */
